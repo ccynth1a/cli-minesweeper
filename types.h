@@ -5,11 +5,11 @@
 #define Y_MAX 25
 #define BUFFER_SIZE 256
 
-enum block_t {
-  MINE = '.',
-  FLAG = 'F',
-  EMPTY = ' '
-};
+#define MINE 'M'
+#define EMPTY  '.'
+#define FLAG 'F'
+
+#define ANSI_RESET "\033[0m"
 
 enum action_t {
   PLACE_FLAG = 'F', CHECK = 'C', UNKNOWN = 'U'
