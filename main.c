@@ -10,9 +10,31 @@
 game_t board_struct;
 bool visited[Y_MAX][X_MAX];
 
+bool flags_match_mines(game_t *board)
+{
+	int num_correct_flags = 0;
+	int num_flags = 0;
+	int num_mines = board->num_mines;
+	for (int row = 0; row < Y_MAX;row++) {
+		for (int column = 0; column < X_MAX; column++) {
+			if (board->display[row][column] == FLAG) {
+				num_flags++;
+				if (board->true_layout[row][column] == MINE) {
+					num_correct_flags++;
+				}
+			} else if (board->display[row][column] == '#') {
+				return false;
+			}
+		}
+	}
+	if (num_correct_flags == num_mines && num_flags == num_mines) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 // itoa() isnt in gcc stdlib so we ball 
-
 char itoa(unsigned int value)  // only works for numbers 0-9. if it is detecting more than 9 mines im pretty sure something has gone horribly wrong
 {
   return value + '0';
@@ -79,23 +101,32 @@ void draw_screen(game_t *board, bool true_layout)
 	  // character codes
 	  switch (c) {
 		  case FLAG:
-			  printf("\x1b[41m");
+			  printf("\x1b[41m"); // red
 			  break;
 		  case '1':
-			  printf("\033[0;32m");
+			  printf("\033[0;32m"); //green
 			  break;
 		  case '2':
-			  printf("\033[0;33m");
+			  printf("\033[0;33m"); //yellow
 			  break;
 		  case '3':
-			  printf("\033[0;34m");
+			  printf("\033[0;34m"); //blue
 			  break;
 		  case '4':
-			  printf("\033[0;35m");
+			  printf("\033[0;35m"); //magenta
 			  break;
 		  case '5':
-			  printf("\033[0;36m");
-
+			  printf("\033[0;36m"); // cyan
+			  break;
+		  case '6':
+			  printf("\x1b[38;5;225m"); // pink
+			  break;
+		  case '7':
+			  printf("\x1b[38;5;220m"); // orange
+			  break;
+		  case '8':
+			  printf("\x1b[38;5;129m");
+			  break;
 	  }
 
       putc(screen[row][column], stdout);
@@ -108,6 +139,10 @@ void draw_screen(game_t *board, bool true_layout)
 
 void place_flag(game_t *board, int x, int y)
 {
+	if (board->display[y][x] == FLAG) {
+		board->display[y][x] = '#';
+		return;
+	}
 	board->display[y][x] = FLAG;
 	printf("\033[2J");
 	draw_screen(board, false);
@@ -246,7 +281,7 @@ int main(int argc, char *argv[])
     scanf("%s", input);
     input_t *parsed_input = parse_input(input);
     if (parsed_input == NULL) {
-      exit(1);
+      continue;
     }
 	switch (parsed_input->action) {
 		case PLACE_FLAG:
@@ -261,6 +296,10 @@ int main(int argc, char *argv[])
 			check_squares(parsed_input->x, parsed_input->y);
 	}
 	free(parsed_input);
+	if (flags_match_mines(&board_struct)) {
+		break;	
+	}
   }
+  printf("YOU WIN");
   return 0;
 }

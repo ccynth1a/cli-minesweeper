@@ -1,8 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define X_MAX 25 
-#define Y_MAX 25
+#define X_MAX 15
+#define Y_MAX 15
 #define BUFFER_SIZE 256
 
 #define MINE 'M'
