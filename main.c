@@ -231,6 +231,7 @@ int check_squares(int x, int y)
   }
 }
 
+// currently not bothered to put this in lmao
 void help_menu()
 {
   printf("MINESWEEPER HELP.\n"
