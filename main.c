@@ -10,6 +10,7 @@
 game_t board_struct;
 bool visited[Y_MAX][X_MAX];
 
+// Function that returns true only when the flags all match with the mines, and there are no empty squares
 bool flags_match_mines(game_t *board)
 {
 	int num_correct_flags = 0;
@@ -40,6 +41,7 @@ char itoa(unsigned int value)  // only works for numbers 0-9. if it is detecting
   return value + '0';
 }
 
+// Parse input for action, x and y and return an input_t struct
 // C-X-Y expected input
 input_t *parse_input(char *input)
 {
@@ -78,13 +80,14 @@ input_t *parse_input(char *input)
   return turn_input;
 }
 
+// recursively draw the screen with its borders
 void draw_screen(game_t *board, bool true_layout)
 {
   printf("\033[2J");
   char (*screen)[X_MAX];
   if (true_layout) {screen = board->true_layout;} else {screen = board->display;}
   // print the top index row
-  printf("\n   ");
+  printf("\n    ");
   for (int i = 0; i < X_MAX; i++) {
     printf("%c ", i+65);
   }
@@ -92,9 +95,9 @@ void draw_screen(game_t *board, bool true_layout)
 
   for (int row = 0; row < Y_MAX; row++) {
     if (row >= 10) {
-      printf("%d ", row);
+      printf("%d |", row);
     } else {
-      printf("%d  ", row);
+      printf("%d  |", row);
     }
     for (int column = 0; column < X_MAX; column++) {
 	  char c = screen[row][column];	
@@ -125,7 +128,7 @@ void draw_screen(game_t *board, bool true_layout)
 			  printf("\x1b[38;5;220m"); // orange
 			  break;
 		  case '8':
-			  printf("\x1b[38;5;129m");
+			  printf("\x1b[38;5;129m"); // porpol
 			  break;
 	  }
 
@@ -137,6 +140,7 @@ void draw_screen(game_t *board, bool true_layout)
   }
 }
 
+// toggle flag on a target position
 void place_flag(game_t *board, int x, int y)
 {
 	if (board->display[y][x] == FLAG) {
@@ -156,6 +160,7 @@ void game_over(game_t *board, int x, int y)
 	printf("GAME OVER");
 }
 
+// recursively check squares in a cardinal direction to produce the "cascade" effect when many empty squares border each other
 int check_squares(int x, int y)
 {
   // first check that input is in expected range.
@@ -198,6 +203,7 @@ void help_menu()
   sleep(3);
 }
 
+// fill entire array with '#'
 void initialise_screen_array(game_t *board)
 {
   for (int row = 0; row < Y_MAX; row++) {
@@ -207,6 +213,7 @@ void initialise_screen_array(game_t *board)
   }
 }
 
+// similar to check_squares() except 8 directional
 unsigned int count_neighbours(int x, int y, game_t *board)
 {
   unsigned int neighbours = 0;
@@ -228,6 +235,7 @@ unsigned int count_neighbours(int x, int y, game_t *board)
   return neighbours;
 }
 
+// puts the numbers of the neighbouring squares on the board
 int set_numbers(game_t *board)
 {
   char buff[2]; // buffer for digit
@@ -248,6 +256,7 @@ int set_numbers(game_t *board)
   }
 }
 
+// fill the board with randomised squares
 void generate_board(game_t *board)
 {
   int random_block;
