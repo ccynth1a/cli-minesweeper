@@ -6,9 +6,48 @@
 #include <string.h>
 #include <stdbool.h>
 #include "types.h"
+#include "main.h"
 // global vars
-game_t board_struct;
+game_t *pBoard;
 bool visited[Y_MAX][X_MAX];
+
+int main(int argc, char *argv[])
+{
+  srand(time(NULL));
+  pBoard = (game_t*)malloc(sizeof(game_t));
+  initialise_screen_array(pBoard);
+  generate_board(pBoard);
+
+  char input[BUFFER_SIZE];
+  // main game loop
+  while (1) {
+    draw_screen(pBoard, false);
+    printf("Type ! to open help menu\n");
+    scanf("%s", input);
+    input_t *parsed_input = parse_input(input);
+    if (parsed_input == NULL) {
+      continue;
+    }
+	switch (parsed_input->action) {
+		case PLACE_FLAG:
+			place_flag(pBoard, parsed_input->x, parsed_input->y);
+			break;
+		case CHECK:
+			if (pBoard->true_layout[parsed_input->y][parsed_input->x] == MINE) {
+				game_over(pBoard, parsed_input->x, parsed_input->y);
+				free(parsed_input);
+				exit(0);
+			}
+			check_squares(parsed_input->x, parsed_input->y);
+	}
+	free(parsed_input);
+	if (flags_match_mines(pBoard)) {
+		break;	
+	}
+  }
+  printf("YOU WIN");
+  return 0;
+}
 
 // Function that returns true only when the flags all match with the mines, and there are no empty squares
 bool flags_match_mines(game_t *board)
@@ -171,11 +210,11 @@ int check_squares(int x, int y)
     return 0; // recursively return if the cell has already been visited
   }
   visited[y][x] = true;// if not visited, then mark it as so
-  if (board_struct.true_layout[y][x] != MINE) {
-	  board_struct.display[y][x] = board_struct.true_layout[y][x];// change the displayed character to be the real character
+  if (pBoard->true_layout[y][x] != MINE) {
+	  pBoard->display[y][x] = pBoard->true_layout[y][x];// change the displayed character to be the real character
   }
   
-  if (board_struct.true_layout[y][x] != EMPTY) { // reveal numbers (should not reveal bombs)
+  if (pBoard->true_layout[y][x] != EMPTY) { // reveal numbers (should not reveal bombs)
     return 0;
   }
 
@@ -226,7 +265,7 @@ unsigned int count_neighbours(int x, int y, game_t *board)
       int new_x = x + directions[i][0];
       int new_y = y + directions[i][1];
       if (new_x >= 0 && new_x < X_MAX && new_y >= 0 && new_y < Y_MAX) {
-          if (board_struct.true_layout[new_y][new_x] == MINE) {
+          if (board->true_layout[new_y][new_x] == MINE) {
 			  neighbours++;
           }
       }
@@ -276,39 +315,40 @@ void generate_board(game_t *board)
   draw_screen(board, true);
 }
 
-int main(int argc, char *argv[])
-{
-  srand(time(NULL));
-  initialise_screen_array(&board_struct);
-  generate_board(&board_struct);
 
-  char input[BUFFER_SIZE];
-  // main game loop
-  while (1) {
-    draw_screen(&board_struct, false);
-    printf("Type ! to open help menu\n");
-    scanf("%s", input);
-    input_t *parsed_input = parse_input(input);
-    if (parsed_input == NULL) {
-      continue;
-    }
-	switch (parsed_input->action) {
-		case PLACE_FLAG:
-			place_flag(&board_struct, parsed_input->x, parsed_input->y);
-			break;
-		case CHECK:
-			if (board_struct.true_layout[parsed_input->y][parsed_input->x] == MINE) {
-				game_over(&board_struct, parsed_input->x, parsed_input->y);
-				free(parsed_input);
-				exit(0);
-			}
-			check_squares(parsed_input->x, parsed_input->y);
-	}
-	free(parsed_input);
-	if (flags_match_mines(&board_struct)) {
-		break;	
-	}
-  }
-  printf("YOU WIN");
-  return 0;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
