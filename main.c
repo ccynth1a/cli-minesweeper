@@ -13,13 +13,18 @@ bool visited[Y_MAX][X_MAX];
 
 int main(int argc, char *argv[])
 {
-  srand(time(NULL));
-  pBoard = (game_t*)malloc(sizeof(game_t));
+  srand(time(NULL)); // intialise random number generator
+  pBoard = (game_t*)malloc(sizeof(game_t)); // declared on heap because why not
   initialise_screen_array(pBoard);
   generate_board(pBoard);
 
   char input[BUFFER_SIZE];
-  // main game loop
+  // main game loop:
+  // - draw screen
+  // - hang on an input prompt
+  // - parse that input prompt
+  // - perform the appropriate action
+  // - repeat
   while (1) {
     draw_screen(pBoard, false);
     printf("Type ! to open help menu\n");
@@ -55,6 +60,7 @@ bool flags_match_mines(game_t *board)
 	int num_correct_flags = 0;
 	int num_flags = 0;
 	int num_mines = board->num_mines;
+	// TODO: this nesting is disgusting, please fix
 	for (int row = 0; row < Y_MAX;row++) {
 		for (int column = 0; column < X_MAX; column++) {
 			if (board->display[row][column] == FLAG) {
@@ -68,13 +74,14 @@ bool flags_match_mines(game_t *board)
 		}
 	}
 	if (num_correct_flags == num_mines && num_flags == num_mines) {
-		return true;
+		return true; // win condition
 	} else {
 		return false;
 	}
 }
 
-// itoa() isnt in gcc stdlib so we ball 
+// itoa() isnt in gcc stdlib so we ball
+// NOTE: for some reason its in stdlib on windows but not linux????
 char itoa(unsigned int value)  // only works for numbers 0-9. if it is detecting more than 9 mines im pretty sure something has gone horribly wrong
 {
   return value + '0';
@@ -122,16 +129,17 @@ input_t *parse_input(char *input)
 // recursively draw the screen with its borders
 void draw_screen(game_t *board, bool true_layout)
 {
-  printf("\033[2J");
+  printf("\033[2J"); // ansi clear
   char (*screen)[X_MAX];
   if (true_layout) {screen = board->true_layout;} else {screen = board->display;}
   // print the top index row
   printf("\n    ");
   for (int i = 0; i < X_MAX; i++) {
-    printf("%c ", i+65);
+    printf("%c ", i+65); // scuffed ascii math, should hold up just fine as long as boards dont exceed a 195
   }
   putc('\n', stdout);
-
+	
+  // print vertical bar
   for (int row = 0; row < Y_MAX; row++) {
     if (row >= 10) {
       printf("%d |", row);
@@ -225,7 +233,7 @@ int check_squares(int x, int y)
   for (int i = 0; i < 4; i++) {
     int new_x = x + directions[i][0];
     int new_y = y + directions[i][1];
-    if (new_x >= 0 && new_x < X_MAX && new_y >= 0 && new_y < Y_MAX) {
+    if (new_x >= 0 && new_x < X_MAX && new_y >= 0 && new_y < Y_MAX) { // segfault guarding
 		check_squares(new_x, new_y);
     }
   }
